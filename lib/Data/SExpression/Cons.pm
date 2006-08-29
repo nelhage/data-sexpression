@@ -11,8 +11,10 @@ Data::SExpression.
 =cut
 
 package Data::SExpression::Cons;
-use base qw(Class::Accessor::Fast);
+use base qw(Class::Accessor::Fast Exporter);
 __PACKAGE__->mk_accessors(qw(car cdr));
+
+our @EXPORT_OK = qw(cons consp);
 
 =head2 new CAR CDR
 
@@ -42,6 +44,36 @@ sub mutator_name_for {
     my $self = shift;
     my $name = shift;
     return "set_$name";
+}
+
+=head1 NON-METHOD FUNCTIONS
+
+These are all generic methods to make operating on cons's easier in
+perl. You can ask for any of these in the export list, e.g.
+
+    use Data::SExpression::Cons qw(cons consp);
+
+=head2 cons CAR CDR
+
+Convenience method for Data::SExpression->new(CAR, CDR)
+
+=cut
+
+sub cons ($$) {
+    my ($car, $cdr) = @_;
+    return __PACKAGE__->new($car, $cdr);
+}
+
+=head2 consp THING
+
+Returns true iff C<THING> is a reference to a
+C<Data::SExpression::Cons>
+
+=cut
+
+sub consp ($) {
+    my $thing = shift;
+    return ref($thing) && UNIVERSAL::isa($thing, __PACKAGE__);
 }
 
 =head1 SEE ALSO
