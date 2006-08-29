@@ -8,7 +8,7 @@ Test some special read forms, like quote and such.
 
 =cut
 
-use Test::More 'no_plan';
+use Test::More tests => 4;
 use Test::Deep;
 
 use Data::SExpression;
