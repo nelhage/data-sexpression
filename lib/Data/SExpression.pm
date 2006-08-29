@@ -8,7 +8,27 @@ our $VERSION = '0.1.0';
 Data::SExpression -- Parse Lisp S-Expressions into perl data
 structures.
 
-=head1 DESCRIPTION
+=head1 SYNOPSIS
+
+    use Data::SExpression;
+
+    my $ds = Data::SExpression->new;
+
+    $ds->read("(foo bar baz)");          # [\*::foo, \*::bar, \*::baz]
+
+    my @sexps;
+    my $sexp;
+    while(1) {
+        eval {
+            ($sexp, $text) = $ds->read($text);
+        };
+        last if $@;
+        push @sexps, $sexp;
+    }
+
+    $ds = Data::SExpression->new(fold_alists => 1);
+
+    $ds->read("((top . 4) (left . 5)");  # {\*::top => 4, \*::left => 5}
 
 =cut
 
@@ -24,6 +44,8 @@ use Data::SExpression::Cons qw(cons consp scalarp);
 use Carp qw(croak);
 
 my $grammar;
+
+=head1 METHODS
 
 =head2 new [\%args]
 
@@ -41,21 +63,22 @@ Defaults to true.
 
 If true, fold lisp alists into perl hashrefs. e.g.
 
-"((fg . red) (bg . black) (weight . bold))"
+C<"((fg . red) (bg . black) (weight . bold))">
 
 would become
 
-{
-    \*fg       => \*red,
-    \*bg       => \*black,
-    \*weight   => \*bold
-}
+    {
+        \*fg       => \*red,
+        \*bg       => \*black,
+        \*weight   => \*bold
+    }
 
 Alists will only be folded if they are a list of conses, all of which
 have scalars as both their C<car> and C<cdr> (See
 L<Data::SExpression::Cons/scalarp>)
 
-This option implies C<fold_lists>
+This option implies L</fold_lists>
+
 Defaults to false.
 
 =back
