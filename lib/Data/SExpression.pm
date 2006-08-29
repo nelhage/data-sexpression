@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 
-our $VERSION = '0.0.1';
+our $VERSION = '0.1.0';
 
 =head1 NAME
 
@@ -53,7 +53,7 @@ would become
 
 Alists will only be folded if they are a list of conses, all of which
 have scalars as both their C<car> and C<cdr> (See
-L<Data::SExpression::Cons/scalar)
+L<Data::SExpression::Cons/scalar>)
 
 This option implies C<fold_lists>
 Defaults to false.
