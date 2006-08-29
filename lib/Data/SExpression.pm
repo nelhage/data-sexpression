@@ -53,7 +53,7 @@ would become
 
 Alists will only be folded if they are a list of conses, all of which
 have scalars as both their C<car> and C<cdr> (See
-L<Data::SExpression::Cons/scalar>)
+L<Data::SExpression::Cons/scalarp>)
 
 This option implies C<fold_lists>
 Defaults to false.
@@ -84,22 +84,65 @@ sub new {
 
 =head2 read STRING
 
-Returns the parsed SExpression from STRING, or dies with an error if
-the parse fails.
+Parse an SExpression from the start of STRING, or die if the parse
+fails.
+
+In scalar context, returns the expression parsed as a perl data
+structure; In list context, also return the part of STRING left
+unparsed. This means you can read all the expressions in a string
+with:
+
+    my @sexps;
+    my $sexp;
+    while(1) {
+        eval {
+            ($sexp, $text) = $ds->read($text);
+        };
+        last if $@;
+        push @sexps, $sexp;
+    }
+
+
+This method converts Lisp SExpressions into perl data structures by
+the following rules:
+
+=over 4
+
+=item Numbers and Strings become perl scalars
+
+Lisp differentiates between the types; perl doesn't.
+
+=item Symbols become globrefs in main::
+
+This means they become something like \*main::foo, or \*::foo for
+short. To convert from a string to a symbol, you can use
+L<Symbol/qualify_to_ref>, with C<"main"> as the package.
+
+=item Conses become Data::SExpression::Cons objects
+
+See L<Data::SExpression::Cons> for how to deal with these. See also
+the C<fold_lists> and C<fold_alists> arguments to L</new>.
+
+=item Quotation is parsed as in scheme
+
+This means that "'foo" is parsed like "(quote foo)", "`foo" like
+"(quasiquote foo)", and ",foo" like "(unquote foo)".
+
+=back
 
 =cut
 
 sub read {
     my $self = shift;
     my $string = shift;
-    my $value = $self->get_parser->sexpression($string);
+    my $value = $self->get_parser->sexpression(wantarray ? \$string : $string);
 
     croak("SExp Parse error") unless defined($value);
 
     $value = $self->_fold_lists($value) if $self->get_fold_lists;
     $value = $self->_fold_alists($value) if $self->get_fold_alists;
 
-    return $value;
+    return wantarray ? ($value, $string) : $value;
 }
 
 =head2 extract_string STRING
@@ -162,7 +205,7 @@ sub _fold_alists {
 
 $grammar = q{
 
-  sexpression:          number | symbol | string | list | quoted | <error>
+  sexpression:          number | symbol | string | list | quoted
 
   # Scalar types
 
