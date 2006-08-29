@@ -20,7 +20,7 @@ __PACKAGE__->mk_ro_accessors(qw(parser fold_lists fold_alists));
 
 use Symbol;
 use Parse::RecDescent;
-use Data::SExpression::Cons qw(cons consp);
+use Data::SExpression::Cons qw(cons consp scalarp);
 use Carp qw(croak);
 
 my $grammar;
@@ -50,7 +50,8 @@ would become
 }
 
 Alists will only be folded if they are a list of conses, all of which
-have non-conses as both their C<car> and C<cdr>
+have scalars as both their C<car> and C<cdr> (See
+L<Data::SExpression::Cons/scalar)
 
 This option implies C<fold_lists>
 
@@ -143,7 +144,7 @@ sub _fold_alists {
     #Assume $thing has already been list-folded
 
     if(ref($thing) eq "ARRAY") {
-        if( for_all {consp $_ && !consp $_->car && !consp $_->cdr} @{$thing} ) {
+        if( for_all {consp $_ && scalarp $_->car && scalarp $_->cdr} @{$thing} ) {
             return {map {$_->car => $_ -> cdr} @{$thing}};
         } else {
             return [map {$self->_fold_alists($_)} @{$thing}];
@@ -158,7 +159,7 @@ sub _fold_alists {
 
 $grammar = q{
 
-  sexpression:          number | symbol | string | list
+  sexpression:          number | symbol | string | list | <error>
 
   # Scalar types
 

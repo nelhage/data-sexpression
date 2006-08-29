@@ -14,7 +14,7 @@ package Data::SExpression::Cons;
 use base qw(Class::Accessor::Fast Exporter);
 __PACKAGE__->mk_accessors(qw(car cdr));
 
-our @EXPORT_OK = qw(cons consp);
+our @EXPORT_OK = qw(cons consp scalarp);
 
 =head2 new CAR CDR
 
@@ -74,6 +74,17 @@ C<Data::SExpression::Cons>
 sub consp ($) {
     my $thing = shift;
     return ref($thing) && UNIVERSAL::isa($thing, __PACKAGE__);
+}
+
+=head2 scalarp THING
+
+Returns true iff THING is a scalar -- i.e. a string, symbol, or number
+
+=cut
+
+sub scalarp ($) {
+    my $thing = shift;
+    return !ref($thing) || ref($thing) eq "GLOB";
 }
 
 =head1 SEE ALSO

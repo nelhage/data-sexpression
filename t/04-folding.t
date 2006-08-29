@@ -66,3 +66,30 @@ cmp_deeply(
        ],
     "Didn't fold an alist of lists",
    );
+
+cmp_deeply(
+    $ds->read('((fg red) (bg black) (weight bold))'),
+    [
+        [\*fg,     \*red],
+        [\*bg,     \*black],
+        [\*weight, \*bold]
+       ],
+    "Didn't fold an alist of lists",
+   );
+
+
+{
+    no warnings 'once';
+    cmp_deeply(
+        $ds->read('(((first name) . Joe) ((last name) . Bob))'),
+        [
+            methods(
+                car => [\*first, \*name],
+                cdr => \*Joe),
+            methods(
+                car => [\*last, \*name],
+                cdr => \*Bob)
+           ],
+        "Didn't fold an alist with list keys",
+       );
+}
