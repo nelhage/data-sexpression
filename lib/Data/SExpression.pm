@@ -34,16 +34,63 @@ structures.
 
 package Data::SExpression;
 
-use base qw(Class::Accessor::Fast);
+use base qw(Class::Accessor::Fast Exporter);
 __PACKAGE__->follow_best_practice;
 __PACKAGE__->mk_ro_accessors(qw(parser fold_lists fold_alists));
 
+our @EXPORT_OK = qw(cons consp scalarp);
+
 use Symbol;
-use Parse::RecDescent;
-use Data::SExpression::Cons qw(cons consp scalarp);
+use Data::SExpression::Cons;
+use Data::SExpression::Parser;
 use Carp qw(croak);
 
+
 my $grammar;
+
+
+=head1 LISP-LIKE CONVENIENCE FUNCTIONS
+
+These are all generic methods to make operating on cons's easier in
+perl. You can ask for any of these in the export list, e.g.
+
+    use Data::SExpression qw(cons consp);
+
+=head2 cons CAR CDR
+
+Convenience method for Data::SExpression::Cons->new(CAR, CDR)
+
+=cut
+
+sub cons ($$) {
+    my ($car, $cdr) = @_;
+    return Data::SExpression::Cons->new($car, $cdr);
+}
+
+=head2 consp THING
+
+Returns true iff C<THING> is a reference to a
+C<Data::SExpression::Cons>
+
+=cut
+
+sub consp ($) {
+    my $thing = shift;
+    return ref($thing) && UNIVERSAL::isa($thing, 'Data::SExpression::Cons');
+}
+
+=head2 scalarp THING
+
+Returns true iff C<THING> is a scalar -- i.e. a string, symbol, or
+number
+
+=cut
+
+sub scalarp ($) {
+    my $thing = shift;
+    return !ref($thing) || ref($thing) eq "GLOB";
+}
+
 
 =head1 METHODS
 
@@ -92,7 +139,7 @@ sub new {
     $::RD_HINT = 1;
     #$::RD_TRACE = 1;
     
-    my $parser = Parse::RecDescent->new($grammar);
+    my $parser = Data::SExpression::Parser->new;
 
     $args->{fold_lists} = 1 if $args->{fold_alists};
 
@@ -158,29 +205,19 @@ This means that "'foo" is parsed like "(quote foo)", "`foo" like
 sub read {
     my $self = shift;
     my $string = shift;
-    my $value = $self->get_parser->sexpression(wantarray ? \$string : $string);
+
+    $self->get_parser->set_input($string);
+    
+    my $value = $self->get_parser->parse;
 
     croak("SExp Parse error") unless defined($value);
 
     $value = $self->_fold_lists($value) if $self->get_fold_lists;
     $value = $self->_fold_alists($value) if $self->get_fold_alists;
 
-    return wantarray ? ($value, $string) : $value;
-}
+    my $unparsed = $self->get_parser->unparsed_input;
 
-=head2 extract_string STRING
-
-Internal use only.
-
-=cut
-
-sub extract_string {
-    my $str =  shift;
-    $str = substr $str, 1, ((length $str)-2);
-
-    $str =~ s/\\"/"/g;
-    
-    return $str;
+    return wantarray ? ($value, $unparsed) : $value;
 }
 
 sub _fold_lists {
@@ -225,35 +262,6 @@ sub _fold_alists {
         return $thing;
     }
 }
-
-$grammar = q{
-
-  sexpression:          <skip: qr{\\s*(;.*\\s*)*}x>
-                        (number | symbol | string | list | quoted)
-
-  # Scalar types
-
-  number:               /[+-]?\\d+(?:[.]\\d*)?/
-
-  symbol:               m([*!\\$\\w\\?<>=/+-][*!\\$\\w\\?<>=/\\d+-]*)     {$return = Symbol::qualify_to_ref($item[1],"main")}
-
-  string:               /".*?[^\\\\]"/               {$return = Data::SExpression::extract_string($item[1])}
-                      | '""'                         {$return = ""}
-
-  list:                 "(" list_interior ")"        {$return = $item[2]}
-
-  list_interior:        sexpression list_interior    {$return = Data::SExpression::Cons->new($item[1], $item[2])}
-                      | sexpression ... ")"          {$return = Data::SExpression::Cons->new($item[1], undef)}
-                      | sexpression "." sexpression  {$return = Data::SExpression::Cons->new($item[1], $item[3])}
-
-  quoted:               quote_form["'","quote"]
-                      | quote_form["`","quasiquote"]
-                      | quote_form[",","unquote"]
-
-  quote_form:           "$arg[0]" sexpression        {$return = Data::SExpression::Cons->new(Symbol::qualify_to_ref($arg[1], "main"),
-                                                                Data::SExpression::Cons->new($item[2], undef))}
-
-};
 
 =head1 AUTHOR
 
