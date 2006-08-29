@@ -18,25 +18,25 @@ my $ds = Data::SExpression->new;
 {
     no warnings 'once';
     cmp_deeply(
-        $ds->read("'(a b c)"),
+        scalar $ds->read("'(a b c)"),
         [\*::quote, [\*::a, \*::b, \*::c]],
         "Parsed quote correctly"
        );
 
     cmp_deeply(
-        $ds->read("`(a b c)"),
+        scalar $ds->read("`(a b c)"),
         [\*::quasiquote, [\*::a, \*::b, \*::c]],
         "Parsed quasiquote correctly"
        );
 
     cmp_deeply(
-        $ds->read(",(a b c)"),
+        scalar $ds->read(",(a b c)"),
         [\*::unquote, [\*::a, \*::b, \*::c]],
         "Parsed unquote correctly"
        );
 
     cmp_deeply(
-        $ds->read("'`(a ,b ,c)"),
+        scalar $ds->read("'`(a ,b ,c)"),
         [\*::quote, [\*::quasiquote, [\*::a, [\*::unquote, \*::b], [\*::unquote, \*::c]]]],
         "Parsed quote, quasiquote, and unquote together"
        );

@@ -16,12 +16,12 @@ use Data::SExpression;
 my $ds = Data::SExpression->new({fold_lists => 1});
 
 cmp_deeply(
-    $ds->read('(1 2 3 4)'),
+    scalar $ds->read('(1 2 3 4)'),
     [1, 2, 3, 4],
     "Folded a simple list");
 
 cmp_deeply(
-    $ds->read('(1 2 . 3)'),
+    scalar $ds->read('(1 2 . 3)'),
     methods(
         car => 1,
         cdr => methods(
@@ -30,7 +30,7 @@ cmp_deeply(
     "Didn't fold an improper list");
 
 cmp_deeply(
-    $ds->read('((fg . red) (bg . black) (weight . bold))'),
+    scalar $ds->read('((fg . red) (bg . black) (weight . bold))'),
     [
         methods(car => \*fg, cdr => \*red),
         methods(car => \*bg, cdr => \*black),
@@ -43,12 +43,12 @@ cmp_deeply(
 $ds = Data::SExpression->new({fold_alists => 1});
 
 cmp_deeply(
-    $ds->read('(1 2 3 4)'),
+    scalar $ds->read('(1 2 3 4)'),
     [1, 2, 3, 4],
     "fold_alists implies fold_lists");
 
 cmp_deeply(
-    $ds->read('((fg . red) (bg . black) (weight . bold))'),
+    scalar $ds->read('((fg . red) (bg . black) (weight . bold))'),
   {
       \*fg     => \*red,
       \*bg     => \*black,
@@ -58,7 +58,7 @@ cmp_deeply(
 
 
 cmp_deeply(
-    $ds->read('((fg red) (bg black) (weight bold))'),
+    scalar $ds->read('((fg red) (bg black) (weight bold))'),
     [
         [\*fg,     \*red],
         [\*bg,     \*black],
@@ -68,7 +68,7 @@ cmp_deeply(
    );
 
 cmp_deeply(
-    $ds->read('((fg red) (bg black) (weight bold))'),
+    scalar $ds->read('((fg red) (bg black) (weight bold))'),
     [
         [\*fg,     \*red],
         [\*bg,     \*black],
@@ -81,7 +81,7 @@ cmp_deeply(
 {
     no warnings 'once';
     cmp_deeply(
-        $ds->read('(((first name) . Joe) ((last name) . Bob))'),
+        scalar $ds->read('(((first name) . Joe) ((last name) . Bob))'),
         [
             methods(
                 car => [\*first, \*name],

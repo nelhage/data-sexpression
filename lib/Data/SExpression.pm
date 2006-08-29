@@ -234,7 +234,7 @@ $grammar = q{
 
   number:               /[+-]?\\d+(?:[.]\\d*)?/
 
-  symbol:               /[!\\$\\w-][!\\$\\w+-]*/     {$return = Symbol::qualify_to_ref($item[1],"main")} 
+  symbol:               m([*!\\$\\w\\?<>/][*!\\$\\w\\?<>/\\d+-]*)     {$return = Symbol::qualify_to_ref($item[1],"main")} 
 
   string:               /".*?[^\\\\]"/               {$return = Data::SExpression::extract_string($item[1])}
                       | '""'                         {$return = ""}

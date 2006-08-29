@@ -20,7 +20,7 @@ my $ds = Data::SExpression->new({
 });
 
 cmp_deeply(
-    $ds->read("(1 2 3 4)"),
+    scalar $ds->read("(1 2 3 4)"),
     methods(
         car => 1,
         cdr => methods(
@@ -33,7 +33,7 @@ cmp_deeply(
     "Read a simple list");
 
 cmp_deeply(
-    $ds->read("(1 2 3 . 4)"),
+    scalar $ds->read("(1 2 3 . 4)"),
     methods(
         car => 1,
         cdr => methods(
@@ -44,7 +44,7 @@ cmp_deeply(
     "Read an improper list");
 
 cmp_deeply(
-    $ds->read("((1 2) (3 4))"),
+    scalar $ds->read("((1 2) (3 4))"),
     methods(
         car => methods(
             car => 1,
@@ -62,7 +62,7 @@ cmp_deeply(
 no warnings 'once';     #For the symbol globs
 
 cmp_deeply(
-    $ds->read("((fg . red) (bg . black) (weight . bold))"),
+    scalar $ds->read("((fg . red) (bg . black) (weight . bold))"),
     methods(
         car => methods(
             car => \*fg,

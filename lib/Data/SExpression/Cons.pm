@@ -3,7 +3,7 @@ use strict;
 
 =head1 NAME
 
-Data::SExpression::Cons -- Representation of a Lisp cons as read by
+Data::SExpression::Cons -- Representation of a Lisp cons read by
 Data::SExpression.
 
 =head1 DESCRIPTION
@@ -78,7 +78,8 @@ sub consp ($) {
 
 =head2 scalarp THING
 
-Returns true iff THING is a scalar -- i.e. a string, symbol, or number
+Returns true iff C<THING> is a scalar -- i.e. a string, symbol, or
+number
 
 =cut
 
