@@ -8,7 +8,7 @@ Test the parsing of lists, without folding.
 
 =cut
 
-use Test::More tests => 4;
+use Test::More tests => 5;
 use Test::Deep;
 use Symbol;
 
@@ -77,3 +77,21 @@ cmp_deeply(
                     cdr => \*bold),
                 cdr => undef))),
     "Read an alist");
+
+cmp_deeply(
+    scalar $ds->read(q{
+;;A comment
+(
+;; More comments
+;; Comment comment comment
+1 ;same-line comment
+2
+;comment comment
+)
+}),
+    methods(
+        car => 1,
+        cdr => methods(
+           car => 2,
+           cdr => undef)),
+    "Skipped comments in list");

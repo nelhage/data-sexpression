@@ -228,13 +228,15 @@ sub _fold_alists {
 
 $grammar = q{
 
-  sexpression:          number | symbol | string | list | quoted
+  sexpression:          <skip: qr{\\s*(;.*\\s*)*}x>
+                        (number | symbol | string | list | quoted)
 
   # Scalar types
 
   number:               /[+-]?\\d+(?:[.]\\d*)?/
 
-  symbol:               m([*!\\$\\w\\?<>/][*!\\$\\w\\?<>/\\d+-]*)     {$return = Symbol::qualify_to_ref($item[1],"main")} 
+  symbol:               m([*!\\$\\w\\?<>=/+-][*!\\$\\w\\?<>=/\\d+-]*)     {$return = Symbol::qualify_to_ref($item[1],"main")}
+  
 
   string:               /".*?[^\\\\]"/               {$return = Data::SExpression::extract_string($item[1])}
                       | '""'                         {$return = ""}
@@ -261,3 +263,4 @@ Nelson Elhage <nelhage@mit.edu>
 =cut
 
 1;
+

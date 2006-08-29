@@ -8,7 +8,7 @@ Test parsing of scalar types
 
 =cut
 
-use Test::More tests => 9;
+use Test::More tests => 10;
 use Symbol;
 
 use Data::SExpression;
@@ -25,3 +25,7 @@ is(scalar $ds->read('"Hello, \"World\""'), "Hello, \"World\"", "Escaped backslas
 is(scalar $ds->read('""'), "", "Empty string OK");
 cmp_ok(scalar $ds->read('foobar'), "==", qualify_to_ref('foobar', 'main'), "Read symbol OK");
 cmp_ok(scalar $ds->read('foo!'), "==", qualify_to_ref('foo!','main'), "Weird symbol OK");
+is(scalar $ds->read(q{
+;; A comment
+7
+}), 7, "Skipped comment");
