@@ -8,13 +8,16 @@ Test the parsing of lists, without folding.
 
 =cut
 
-use Test::More no_plan => 1;
+use Test::More tests => 4;
 use Test::Deep;
 use Symbol;
 
 use Data::SExpression;
 
-my $ds = Data::SExpression->new({fold_lists => 0});
+my $ds = Data::SExpression->new({
+    fold_lists  => 0,
+    fold_alists => 0
+});
 
 cmp_deeply(
     $ds->read("(1 2 3 4)"),
@@ -55,3 +58,22 @@ cmp_deeply(
                     car => 4,
                     cdr => undef)))),
     "Read a tree");
+
+no warnings 'once';     #For the symbol globs
+
+cmp_deeply(
+    $ds->read("((fg . red) (bg . black) (weight . bold))"),
+    methods(
+        car => methods(
+            car => \*fg,
+            cdr => \*red),
+        cdr => methods(
+            car => methods(
+                car => \*bg,
+                cdr => \*black),
+            cdr => methods(
+                car => methods(
+                    car => \*weight,
+                    cdr => \*bold),
+                cdr => undef))),
+    "Read an alist");
