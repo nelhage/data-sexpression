@@ -35,6 +35,8 @@ Returns a new Data::SExpression object. Possibly args are:
 
 If true, fold lisp lists (e.g. "(1 2 3)") into Perl listrefs, e.g. [1, 2, 3]
 
+Defaults to true.
+
 =item fold_alists
 
 If true, fold lisp alists into perl hashrefs. e.g.
@@ -54,6 +56,7 @@ have scalars as both their C<car> and C<cdr> (See
 L<Data::SExpression::Cons/scalar)
 
 This option implies C<fold_lists>
+Defaults to false.
 
 =back
 
@@ -159,7 +162,7 @@ sub _fold_alists {
 
 $grammar = q{
 
-  sexpression:          number | symbol | string | list | <error>
+  sexpression:          number | symbol | string | list | quoted | <error>
 
   # Scalar types
 
@@ -175,6 +178,13 @@ $grammar = q{
   list_interior:        sexpression list_interior    {$return = Data::SExpression::Cons->new($item[1], $item[2])}
                       | sexpression ... ")"          {$return = Data::SExpression::Cons->new($item[1], undef)}
                       | sexpression "." sexpression  {$return = Data::SExpression::Cons->new($item[1], $item[3])}
+
+  quoted:               quote_form["'","quote"]
+                      | quote_form["`","quasiquote"]
+                      | quote_form[",","unquote"]
+
+  quote_form:           "$arg[0]" sexpression        {$return = Data::SExpression::Cons->new(Symbol::qualify_to_ref($arg[1], "main"),
+                                                                Data::SExpression::Cons->new($item[2], undef))}
 
 };
 
