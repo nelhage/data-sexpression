@@ -8,7 +8,7 @@ Test parsing of scalar types
 
 =cut
 
-use Test::More tests => 10;
+use Test::More tests => 11;
 use Symbol;
 
 use Data::SExpression;
@@ -29,3 +29,4 @@ is(scalar $ds->read(q{
 ;; A comment
 7
 }), 7, "Skipped comment");
+is(scalar $ds->read('+'), qualify_to_ref('+'), "Read '+' symbol");
