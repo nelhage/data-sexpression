@@ -29,8 +29,6 @@ cmp_deeply(
             cdr => 3)),
     "Didn't fold an improper list");
 
-no warnings 'once';
-
 cmp_deeply(
     $ds->read('((fg . red) (bg . black) (weight . bold))'),
     [
@@ -39,3 +37,32 @@ cmp_deeply(
         methods(car => \*weight, cdr => \*bold)
        ],
     "Read an alist");
+
+
+
+$ds = Data::SExpression->new({fold_alists => 1});
+
+cmp_deeply(
+    $ds->read('(1 2 3 4)'),
+    [1, 2, 3, 4],
+    "fold_alists implies fold_lists");
+
+cmp_deeply(
+    $ds->read('((fg . red) (bg . black) (weight . bold))'),
+  {
+      \*fg     => \*red,
+      \*bg     => \*black,
+      \*weight => \*bold
+     },
+    "Folded an alist");
+
+
+cmp_deeply(
+    $ds->read('((fg red) (bg black) (weight bold))'),
+    [
+        [\*fg,     \*red],
+        [\*bg,     \*black],
+        [\*weight, \*bold]
+       ],
+    "Didn't fold an alist of lists",
+   );

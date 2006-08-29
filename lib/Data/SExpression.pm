@@ -20,7 +20,7 @@ __PACKAGE__->mk_ro_accessors(qw(parser fold_lists fold_alists));
 
 use Symbol;
 use Parse::RecDescent;
-use Data::SExpression::Cons qw(consp);
+use Data::SExpression::Cons qw(cons consp);
 use Carp qw(croak);
 
 my $grammar;
@@ -49,7 +49,10 @@ would become
     \*weight   => \*bold
 }
 
-Implies C<fold_lists>
+Alists will only be folded if they are a list of conses, all of which
+have non-conses as both their C<car> and C<cdr>
+
+This option implies C<fold_lists>
 
 =back
 
@@ -90,6 +93,7 @@ sub read {
     croak("SExp Parse error") unless defined($value);
 
     $value = $self->_fold_lists($value) if $self->get_fold_lists;
+    $value = $self->_fold_alists($value) if $self->get_fold_alists;
 
     return $value;
 }
@@ -128,6 +132,28 @@ sub _fold_lists {
     }
 
     return $thing;
+}
+
+sub for_all(&@) {$_[0]() or return 0 foreach (@_[1..$#_]); 1;}
+
+sub _fold_alists {
+    my $self = shift;
+    my $thing = shift;
+
+    #Assume $thing has already been list-folded
+
+    if(ref($thing) eq "ARRAY") {
+        if( for_all {consp $_ && !consp $_->car && !consp $_->cdr} @{$thing} ) {
+            return {map {$_->car => $_ -> cdr} @{$thing}};
+        } else {
+            return [map {$self->_fold_alists($_)} @{$thing}];
+        }
+    } elsif(consp $thing) {
+        return cons($self->_fold_alists($thing->car),
+                    $self->_fold_alists($thing->cdr));
+    } else {
+        return $thing;
+    }
 }
 
 $grammar = q{
