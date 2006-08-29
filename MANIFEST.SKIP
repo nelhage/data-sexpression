@@ -1,0 +1,4 @@
+~$
+^Makefile$
+^blib/
+^lib/Data/SExpression/Parser.pm$
