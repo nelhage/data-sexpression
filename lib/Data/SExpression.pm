@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 =head1 NAME
 
@@ -36,60 +36,20 @@ package Data::SExpression;
 
 use base qw(Class::Accessor::Fast Exporter);
 __PACKAGE__->follow_best_practice;
-__PACKAGE__->mk_ro_accessors(qw(parser fold_lists fold_alists));
+__PACKAGE__->mk_ro_accessors(qw(parser symbol_case use_symbol_class fold_dashes fold_lists fold_alists));
 
 our @EXPORT_OK = qw(cons consp scalarp);
 
 use Symbol;
 use Data::SExpression::Cons;
 use Data::SExpression::Parser;
+use Data::SExpression::Symbol;
 use Carp qw(croak);
 
 
-my $grammar;
-
-
-=head1 LISP-LIKE CONVENIENCE FUNCTIONS
-
-These are all generic methods to make operating on cons's easier in
-perl. You can ask for any of these in the export list, e.g.
-
-    use Data::SExpression qw(cons consp);
-
-=head2 cons CAR CDR
-
-Convenience method for Data::SExpression::Cons->new(CAR, CDR)
-
-=cut
-
-sub cons ($$) {
-    my ($car, $cdr) = @_;
-    return Data::SExpression::Cons->new($car, $cdr);
-}
-
-=head2 consp THING
-
-Returns true iff C<THING> is a reference to a
-C<Data::SExpression::Cons>
-
-=cut
-
-sub consp ($) {
-    my $thing = shift;
-    return ref($thing) && UNIVERSAL::isa($thing, 'Data::SExpression::Cons');
-}
-
-=head2 scalarp THING
-
-Returns true iff C<THING> is a scalar -- i.e. a string, symbol, or
-number
-
-=cut
-
-sub scalarp ($) {
-    my $thing = shift;
-    return !ref($thing) || ref($thing) eq "GLOB";
-}
+sub cons ($$);
+sub consp ($);
+sub scalarp ($);
 
 
 =head1 METHODS
@@ -128,6 +88,28 @@ This option implies L</fold_lists>
 
 Defaults to false.
 
+=item symbol_case
+
+Can be C<"up">, C<"down">, or C<undef>, to fold symbol case to
+uppercase, lowercase, or to leave as-is.
+
+Defaults to leaving symbols alone.
+
+=item use_symbol_class
+
+If true, symbols become instances of L<Data::SExpression::Symbol>
+instead of globrefs.
+
+Defaults to false
+
+=item fold_dashes
+
+If true, dash characters in symbols (C<->) will be folded to the more
+perlish underscore, C<_>. This is especially convenient when symbols
+are being converted to globrefs.
+
+Defaults to false.
+
 =back
 
 =cut
@@ -136,9 +118,6 @@ sub new {
     my $class = shift;
     my $args  = shift || {};
 
-    $::RD_HINT = 1;
-    #$::RD_TRACE = 1;
-    
     my $parser = Data::SExpression::Parser->new;
 
     $args->{fold_lists} = 1 if $args->{fold_alists};
@@ -146,10 +125,18 @@ sub new {
     my $self = {
         fold_lists  => 1,
         fold_alists => 0,
+        symbol_case => 0,
+        use_symbol_class => 0,
+        fold_dashes => 0,
         %$args,
         parser      => $parser,
        };
-    return bless($self, $class);
+    
+    bless($self, $class);
+
+    $parser->set_handler($self);
+
+    return $self;
 }
 
 =head2 read STRING
@@ -187,6 +174,8 @@ Lisp differentiates between the types; perl doesn't.
 This means they become something like \*main::foo, or \*::foo for
 short. To convert from a string to a symbol, you can use
 L<Symbol/qualify_to_ref>, with C<"main"> as the package.
+
+But see L</use_symbol_class> if you'd prefer to get back objects.
 
 =item Conses become Data::SExpression::Cons objects
 
@@ -262,6 +251,111 @@ sub _fold_alists {
         return $thing;
     }
 }
+
+=head1 LISP-LIKE CONVENIENCE FUNCTIONS
+
+These are all generic methods to make operating on cons's easier in
+perl. You can ask for any of these in the export list, e.g.
+
+    use Data::SExpression qw(cons consp);
+
+=head2 cons CAR CDR
+
+Convenience method for Data::SExpression::Cons->new(CAR, CDR)
+
+=cut
+
+sub cons ($$) {
+    my ($car, $cdr) = @_;
+    return Data::SExpression::Cons->new($car, $cdr);
+}
+
+=head2 consp THING
+
+Returns true iff C<THING> is a reference to a
+C<Data::SExpression::Cons>
+
+=cut
+
+sub consp ($) {
+    my $thing = shift;
+    return ref($thing) && UNIVERSAL::isa($thing, 'Data::SExpression::Cons');
+}
+
+=head2 scalarp THING
+
+Returns true iff C<THING> is a scalar -- i.e. a string, symbol, or
+number
+
+=cut
+
+sub scalarp ($) {
+    my $thing = shift;
+    return !ref($thing) || ref($thing) eq "GLOB";
+}
+
+=head1 Data::SExpression::Parser callbacks
+
+These are for internal use only, and are used to generate the data
+structures returned by L</read>. 
+
+=head2 new_cons CAR CDR
+
+Returns a new cons with the given CAR and CDR
+
+=cut
+
+sub new_cons {
+    my ($self, $car, $cdr) = @_;
+    return cons($car, $cdr);
+}
+
+=head2 new_symbol NAME
+
+Returns a new symbol with the given name
+
+=cut
+
+sub new_symbol {
+    my ($self, $name) = @_;
+    if($self->get_symbol_case eq 'up') {
+        $name = uc $name;
+    } elsif($self->get_symbol_case eq 'down') {
+        $name = lc $name;
+    }
+
+    if($self->get_fold_dashes) {
+        $name =~ tr/-/_/;
+    }
+
+    if($self->get_use_symbol_class) {
+        return Data::SExpression::Symbol->new($name);
+    } else {
+        return Symbol::qualify_to_ref($name, 'main');
+    }
+}
+
+=head2 new_string CONTENT
+
+Returns a new string with the given raw content
+
+=cut
+
+sub new_string {
+    my ($self, $content) = @_;
+
+    $content =~ s/\\"/"/g;
+
+    return $content;
+}
+
+=head1 BUGS
+
+None known, but there are probably a few. Please reports bugs via
+rt.cpan.org by sending mail to:
+
+L<bug-Data-SExpression@rt.cpan.org>
+
 
 =head1 AUTHOR
 
