@@ -7,7 +7,6 @@
 #
 
 %{
-use Symbol;
 use Data::SExpression::Cons;
 %}
 
@@ -17,8 +16,8 @@ sexpression: expression			 { $_[0]->YYAccept; return $_[1]; }
 ;
 
 expression:   NUMBER
-            | SYMBOL                     { Symbol::qualify_to_ref($_[1], 'main') }
-            | STRING
+            | SYMBOL                     { $_[0]->handler->new_symbol($_[1]) }
+            | STRING                     { $_[0]->handler->new_string($_[1]) }
             | list
             | quoted
 
@@ -29,27 +28,18 @@ list:       '(' list_interior ')'        { $_[2] }
 
 
 list_interior:
-              expression '.' expression  { Data::SExpression::Cons->new($_[1], $_[3]) }
-            | expression list_interior   { Data::SExpression::Cons->new($_[1], $_[2]) }
-            | expression                 { Data::SExpression::Cons->new($_[1], undef) }
+              expression '.' expression  { $_[0]->handler->new_cons($_[1], $_[3]) }
+            | expression list_interior   { $_[0]->handler->new_cons($_[1], $_[2]) }
+            | expression                 { $_[0]->handler->new_cons($_[1], undef) }
 
 ;
 
 quoted:
-              QUOTE expression           { Data::SExpression::Cons->new(Symbol::qualify_to_ref($_[1], "main"),
-                                             Data::SExpression::Cons->new($_[2], undef))}
+              QUOTE expression           { $_[0]->handler->new_cons($_[0]->handler->new_symbol($_[1]),
+                                                                    $_[0]->handler->new_cons($_[2], undef))}
 ;              
 
 %%
-
-sub _extract_string {
-    my $self  = shift;
-    my $str =  shift || '';
-
-    $str =~ s/\\"/"/g;
-    
-    return $str;
-}
 
 sub set_input {
     my $self = shift;
@@ -57,10 +47,22 @@ sub set_input {
     $self->YYData->{INPUT} = $input;
 }
 
+sub set_handler {
+    my $self = shift;
+    my $handler = shift or die(__PACKAGE__ . "::set_handler called with 0 arguments");
+    $self->YYData->{HANDLER} = $handler;
+}
+
+sub handler {
+    my $self = shift;
+    return $self->YYData->{HANDLER};
+}
+
 sub unparsed_input {
     my $self = shift;
     return substr($self->YYData->{INPUT}, pos($self->YYData->{INPUT}));
 }
+
 
 my %quotes = (q{'} => 'quote',
               q{`} => 'quasiquote',
@@ -84,8 +86,8 @@ sub lexer {
         /\G ($symbol_char ($symbol_char | \d )*)/gcx
           and return ('SYMBOL', $1);
 
-        /\G " ([^"\\]* (?: \\. [^"\\]*)*) "/gcx
-          and return ('STRING', $self->_extract_string($1));
+        /\G " (.*? [^\\]) "/gcx || /\G ""/gcx
+          and return ('STRING', $1 || "");
 
         /\G ([().])/gcx
           and return ($1, $1);
