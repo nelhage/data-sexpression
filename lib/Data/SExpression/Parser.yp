@@ -84,7 +84,7 @@ sub lexer {
         /\G ($symbol_char ($symbol_char | \d )*)/gcx
           and return ('SYMBOL', $1);
 
-        /\G " (.*? [^\\]) "/gcx || /\G ""/gcx
+        /\G " ([^"\\]* (?: \\. [^"\\]*)*) "/gcx
           and return ('STRING', $self->_extract_string($1));
 
         /\G ([().])/gcx

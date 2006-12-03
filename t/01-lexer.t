@@ -57,3 +57,51 @@ is_deeply(tokenize(q{a . b}),
           [[SYMBOL => 'a'],
            [q{.}   => q{.}],
            [SYMBOL => 'b']]);
+
+is_deeply(tokenize(q{""}),
+          [[STRING => '']]);
+
+is_deeply(tokenize(q{("")}),
+          [['('    => '('],
+           [STRING => ''],
+           [')'    => ')']]);
+
+is_deeply(tokenize(q{("") ("")}),
+          [['('    => '('],
+           [STRING => ''],
+           [')'    => ')'],
+           ['('    => '('],
+           [STRING => ''],
+           [')'    => ')']]);
+
+is_deeply(tokenize(q{("") (" ")}),
+          [['('    => '('],
+           [STRING => ''],
+           [')'    => ')'],
+           ['('    => '('],
+           [STRING => ' '],
+           [')'    => ')']]);
+
+is_deeply(tokenize(q{("a") ("b")}),
+          [['('    => '('],
+           [STRING => 'a'],
+           [')'    => ')'],
+           ['('    => '('],
+           [STRING => 'b'],
+           [')'    => ')']]);
+
+
+is_deeply(tokenize(qq{"\n"}),
+          [[STRING => "\n"]]);
+
+is_deeply(tokenize(qq{"aa\n"}),
+          [[STRING => "aa\n"]]);
+
+is_deeply(tokenize(qq{"\nbb"}),
+          [[STRING => "\nbb"]]);
+
+is_deeply(tokenize(qq{"aa\nbb"}),
+          [[STRING => "aa\nbb"]]);
+
+is_deeply(tokenize(qq{"aa\nbb\ncc\ndd\n"}),
+          [[STRING => "aa\nbb\ncc\ndd\n"]]);

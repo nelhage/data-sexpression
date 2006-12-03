@@ -8,7 +8,7 @@ Test the parsing of lists, without folding.
 
 =cut
 
-use Test::More tests => 5;
+use Test::More tests => 7;
 use Test::Deep;
 use Symbol;
 
@@ -58,6 +58,22 @@ cmp_deeply(
                     car => 4,
                     cdr => undef)))),
     "Read a tree");
+
+cmp_deeply(
+    scalar $ds->read(qq{("")}),
+    methods(
+        car => "",
+        cdr => undef),
+    "Read an empty string");
+
+cmp_deeply(
+    scalar $ds->read(qq{("" "")}),
+    methods(
+        car => "",
+        cdr => methods(
+            car => "",
+            cdr => undef)),
+    "Read an empty strings");
 
 no warnings 'once';     #For the symbol globs
 
