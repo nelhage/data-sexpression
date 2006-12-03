@@ -47,10 +47,10 @@ is_deeply(tokenize(q{(string-append "Hello " "\"" 'Dave "\"")}),
           [['('    => '('],
            [SYMBOL => 'string-append'],
            [STRING => "Hello "],
-           [STRING => q{"}],
+           [STRING => q{\"}],
            [QUOTE  => 'quote'],
            [SYMBOL => "Dave"],
-           [STRING => q{"}],
+           [STRING => q{\"}],
            [q{)}   => q{)}]]);
 
 is_deeply(tokenize(q{a . b}),

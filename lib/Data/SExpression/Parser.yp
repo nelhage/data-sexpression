@@ -86,7 +86,7 @@ sub lexer {
         /\G ($symbol_char ($symbol_char | \d )*)/gcx
           and return ('SYMBOL', $1);
 
-        /\G " (.*? [^\\]) "/gcx || /\G ""/gcx
+        /\G " ([^"\\]* (?: \\. [^"\\]*)*) "/gcx
           and return ('STRING', $1 || "");
 
         /\G ([().])/gcx
