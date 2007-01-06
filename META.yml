@@ -1,5 +1,5 @@
 distribution_type: module
-generated_by: Module::Install version 0.63
+generated_by: Module::Install version 0.64
 license: Perl
 name: Data-SExpression
 no_index: 
@@ -9,4 +9,4 @@ no_index:
 requires: 
   Class::Accessor::Fast: 0
   Parse::Yapp: 0
-version: 0.2
+version: 0.32
