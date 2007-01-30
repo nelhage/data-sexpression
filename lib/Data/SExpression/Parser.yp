@@ -1,4 +1,4 @@
-#
+# -*- mode: perl -*-
 #
 # Parser.yp
 #
@@ -74,7 +74,7 @@ sub lexer {
 
     $self->YYData->{INPUT} or return ('', undef);
 
-    my $symbol_char = qr{[*!\$[:alpha:]\?<>=/+-]};
+    my $symbol_char = qr{[*!\$[:alpha:]\?<>=/+-:]};
 
     for($self->YYData->{INPUT}) {
         $_ =~ /\G \s* (?: ; .* \s* )* /gcx;
