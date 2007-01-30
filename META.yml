@@ -1,3 +1,6 @@
+build_requires: 
+  Test::Deep: 0
+  Test::More: 0
 distribution_type: module
 generated_by: Module::Install version 0.64
 license: Perl
@@ -9,4 +12,4 @@ no_index:
 requires: 
   Class::Accessor::Fast: 0
   Parse::Yapp: 0
-version: 0.32
+version: 0.33
