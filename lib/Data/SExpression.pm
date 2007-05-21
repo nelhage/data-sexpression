@@ -26,7 +26,7 @@ structures.
         push @sexps, $sexp;
     }
 
-    $ds = Data::SExpression->new(fold_alists => 1);
+    $ds = Data::SExpression->new({fold_alists => 1});
 
     $ds->read("((top . 4) (left . 5)");  # {\*::top => 4, \*::left => 5}
 
