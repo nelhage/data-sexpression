@@ -2,5 +2,8 @@
 ^Makefile$
 ^blib/
 ^lib/Data/SExpression/Parser.pm$
-^MANIFEST.bak$
+^MANIFEST[.]bak$
+^MANIFEST[.]SKIP$
+^test.pl$
 ^pm_to_blib$
+^Data-SExpression-[\d.]+.tar.gz$
