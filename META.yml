@@ -16,4 +16,4 @@ no_index:
 requires: 
   Class::Accessor::Fast: 0
   Parse::Yapp: 0
-version: 0.33
+version: 0.34
