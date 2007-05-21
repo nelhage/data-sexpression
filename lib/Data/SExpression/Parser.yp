@@ -74,7 +74,7 @@ sub lexer {
 
     $self->YYData->{INPUT} or return ('', undef);
 
-    my $symbol_char = qr{[*!\$[:alpha:]\?<>=/+-:]};
+    my $symbol_char = qr{[*!\$[:alpha:]\?<>=/+:_{}-]};
 
     for($self->YYData->{INPUT}) {
         $_ =~ /\G \s* (?: ; .* \s* )* /gcx;
@@ -83,7 +83,10 @@ sub lexer {
         || /\G ([+-]? [.] \d+) /gcx
           and return ('NUMBER', $1);
 
-        /\G ($symbol_char ($symbol_char | \d )*)/gcx
+        /\G ($symbol_char ($symbol_char | \d | [.] )*)/gcx
+          and return ('SYMBOL', $1);
+
+        /\G (\| [^|]* \|) /gcx
           and return ('SYMBOL', $1);
 
         /\G " ([^"\\]* (?: \\. [^"\\]*)*) "/gcx
