@@ -1,9 +1,10 @@
 --- 
+author: ~
 build_requires: 
   Test::Deep: 0
   Test::More: 0
 distribution_type: module
-generated_by: Module::Install version 0.650
+generated_by: Module::Install version 0.68
 license: Perl
 meta-spec: 
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
@@ -16,4 +17,4 @@ no_index:
 requires: 
   Class::Accessor::Fast: 0
   Parse::Yapp: 0
-version: 0.35
+version: 0.36
