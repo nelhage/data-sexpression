@@ -11,9 +11,9 @@ requires('Parse::Yapp');
 build_requires('Test::More');
 build_requires('Test::Deep');
 
-requires_external_bin('yapp');
-
-system('yapp -m Data::SExpression::Parser -o lib/Data/SExpression/Parser.pm lib/Data/SExpression/Parser.yp')
-  and die("Failed: Unable to create Data::SExpression::Parser (Is Parse::Yapp appropriately installed on your system?)");
+postamble(<<"END_MAKEFILE");
+lib/Data/SExpression/Parser.pm: lib/Data/SExpression/Parser.yp
+\tyapp -m Data::SExpression::Parser -o \$@ \$<
+END_MAKEFILE
 
 WriteAll;
