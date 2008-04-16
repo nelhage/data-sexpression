@@ -12,9 +12,9 @@ meta-spec:
 name: Data-SExpression
 no_index: 
   directory: 
+    - build
     - inc
     - t
 requires: 
   Class::Accessor::Fast: 0
-  Parse::Yapp: 0
 version: 0.36
