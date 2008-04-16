@@ -44,7 +44,8 @@ quoted:
 
 sub set_input {
     my $self = shift;
-    my $input = shift or die(__PACKAGE__ . "::set_input called with 0 arguments");
+    my $input = shift;
+    die(__PACKAGE__ . "::set_input called with 0 arguments") unless defined($input);
     $self->YYData->{INPUT} = $input;
 }
 
@@ -74,7 +75,7 @@ my %quotes = (q{'} => 'quote',
 sub lexer {
     my $self = shift;
 
-    $self->YYData->{INPUT} or return ('', undef);
+    defined($self->YYData->{INPUT}) or return ('', undef);
 
     my $symbol_char = qr{[*!\$[:alpha:]\?<>=/+:_{}-]};
 
@@ -92,7 +93,7 @@ sub lexer {
           and return ('SYMBOL', $1);
 
         /\G " ([^"\\]* (?: \\. [^"\\]*)*) "/gcx
-          and return ('STRING', $1 || "");
+          and return ('STRING', defined($1) ? $1 : "");
 
         /\G ([().])/gcx
           and return ($1, $1);
