@@ -10,9 +10,7 @@ Test that Data::SExpression objects do not contain reference cycles
 
 use Test::More;
 
-eval {
-    use Test::Memory::Cycle;
-};
+eval "use Test::Memory::Cycle";
 if($@) {
     plan skip_all => 'Not checking for cycles because Test::Memory::Cycle uninstalled';
     exit 0;
