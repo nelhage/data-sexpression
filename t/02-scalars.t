@@ -8,7 +8,7 @@ Test parsing of scalar types
 
 =cut
 
-use Test::More tests => 15;
+use Test::More tests => 16;
 use Symbol;
 
 use Data::SExpression;
@@ -48,3 +48,6 @@ is(scalar $ds->read(q{
 ; not comment
 "
 }), "\n; not comment\n", "comment in string OK (2)");
+
+# Literal 0
+is(scalar $ds->read(q{0}), 0);
