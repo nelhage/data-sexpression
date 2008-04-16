@@ -1,7 +1,9 @@
 use warnings;
 use strict;
 
-our $VERSION = '0.34';
+package Data::SExpression;
+
+our $VERSION = '0.35';
 
 =head1 NAME
 
@@ -31,8 +33,6 @@ structures.
     $ds->read("((top . 4) (left . 5)");  # {\*::top => 4, \*::left => 5}
 
 =cut
-
-package Data::SExpression;
 
 use base qw(Class::Accessor::Fast Exporter);
 __PACKAGE__->follow_best_practice;
