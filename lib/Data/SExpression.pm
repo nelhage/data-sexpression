@@ -3,7 +3,7 @@ use strict;
 
 package Data::SExpression;
 
-our $VERSION = '0.35';
+our $VERSION = '0.352';
 
 =head1 NAME
 

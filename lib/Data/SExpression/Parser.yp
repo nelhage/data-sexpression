@@ -8,6 +8,7 @@
 
 %{
 use Data::SExpression::Cons;
+use Scalar::Util qw(weaken);
 %}
 
 %%
@@ -51,6 +52,7 @@ sub set_handler {
     my $self = shift;
     my $handler = shift or die(__PACKAGE__ . "::set_handler called with 0 arguments");
     $self->YYData->{HANDLER} = $handler;
+    weaken $self->YYData->{HANDLER};
 }
 
 sub handler {
