@@ -8,7 +8,7 @@ Test the parsing of lists, without folding.
 
 =cut
 
-use Test::More tests => 7;
+use Test::More tests => 8;
 use Test::Deep;
 use Symbol;
 
@@ -111,3 +111,15 @@ cmp_deeply(
            car => 2,
            cdr => undef)),
     "Skipped comments in list");
+
+# Reported by Avinash Varadarajan, 2008-04-09
+# Data::SExpression <= 0.352 misparses "0"
+
+cmp_deeply(
+    scalar $ds->read(q{("value" "0")}),
+    methods(car => "value",
+            cdr => methods(
+                car => "0",
+                cdr => undef
+               ))
+   );
