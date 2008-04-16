@@ -1,5 +1,5 @@
 ~$
-^Makefile$
+^Makefile([.]old)?$
 ^blib/
 ^lib/Data/SExpression/Parser.pm$
 ^MANIFEST[.]bak$
