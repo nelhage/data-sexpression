@@ -30,7 +30,7 @@ structures.
 
     $ds = Data::SExpression->new({fold_alists => 1});
 
-    $ds->read("((top . 4) (left . 5)");  # {\*::top => 4, \*::left => 5}
+    $ds->read("((top . 4) (left . 5))");  # {\*::top => 4, \*::left => 5}
 
 =cut
 
