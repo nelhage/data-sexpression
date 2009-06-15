@@ -305,7 +305,9 @@ number
 
 sub scalarp ($) {
     my $thing = shift;
-    return !ref($thing) || ref($thing) eq "GLOB";
+    return !ref($thing) ||
+            ref($thing) eq "GLOB" ||
+            ref($thing) eq 'Data::SExpression::Symbol';;
 }
 
 =head1 Data::SExpression::Parser callbacks
