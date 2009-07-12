@@ -8,7 +8,7 @@ Test the folding of Lisp lists and alists into perl lists and hashes.
 
 =cut
 
-use Test::More tests => 8;
+use Test::More tests => 12;
 use Test::Deep;
 
 use Data::SExpression;
@@ -38,6 +38,16 @@ cmp_deeply(
        ],
     "Read an alist");
 
+# Reported by clkao, 2009-07-08
+# Data::SExpression <= 0.37 don't handle the empty list
+
+cmp_deeply(scalar $ds->read('()'), [], "Folded the empty list");
+
+cmp_deeply(scalar $ds->read('(())'), [[]]);
+
+cmp_deeply(scalar $ds->read('(1 ())'), [1, []]);
+
+cmp_deeply(scalar $ds->read('(() ())'), [[],[]]);
 
 
 $ds = Data::SExpression->new({fold_alists => 1});

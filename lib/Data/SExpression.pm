@@ -182,6 +182,9 @@ But see L</use_symbol_class> if you'd prefer to get back objects.
 See L<Data::SExpression::Cons> for how to deal with these. See also
 the C<fold_lists> and C<fold_alists> arguments to L</new>.
 
+If C<fold_lists> is false, the Lisp empty list C<()> becomes the perl
+C<undef>. With C<fold_lists>, it turns into C<[]> as you would expect.
+
 =item Quotation is parsed as in scheme
 
 This means that "'foo" is parsed like "(quote foo)", "`foo" like
@@ -199,8 +202,6 @@ sub read {
     
     my $value = $self->get_parser->parse;
 
-    croak("SExp Parse error") unless defined($value);
-
     $value = $self->_fold_lists($value) if $self->get_fold_lists;
     $value = $self->_fold_alists($value) if $self->get_fold_alists;
 
@@ -213,7 +214,9 @@ sub _fold_lists {
     my $self = shift;
     my $thing = shift;
 
-    if(consp $thing) {
+    if(!defined($thing)) {
+        $thing = [];
+    } if(consp $thing) {
         # Recursively fold the car
         $thing->set_car($self->_fold_lists($thing->car));
 

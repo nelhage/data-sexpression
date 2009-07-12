@@ -8,7 +8,7 @@ Test the parsing of lists, without folding.
 
 =cut
 
-use Test::More tests => 8;
+use Test::More tests => 12;
 use Test::Deep;
 use Symbol;
 
@@ -123,3 +123,27 @@ cmp_deeply(
                 cdr => undef
                ))
    );
+
+# Reported by clkao, 2009-07-08
+# Data::SExpression <= 0.37 don't handle the empty list
+
+is(scalar $ds->read('()'), undef);
+
+cmp_deeply(
+    scalar $ds->read('(())'),
+    methods(car => undef,
+            cdr => undef));
+
+cmp_deeply(
+    scalar $ds->read('(1 ())'),
+    methods(car => 1,
+            cdr => methods(
+                car => undef,
+                cdr => undef)));
+
+cmp_deeply(
+    scalar $ds->read('(() ())'),
+    methods(car => undef,
+            cdr => methods(
+               car => undef,
+               cdr => undef)));
